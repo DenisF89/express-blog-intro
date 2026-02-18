@@ -10,7 +10,11 @@ router.get('/', (req, res) => {
 
 //Show (cRud)	--> localhost:3000/posts/1
 router.get('/:id', (req, res) => {
-	res.send(`You requested to SHOW the post with id: ${req.params.id}`);
+	//res.send(`You requested to SHOW the post with id: ${req.params.id}`);
+	const id = Number(req.params.id); 
+	const result = posts.find(post=>post.id===id);
+	if(!result){return res.send("Post not found");}
+	res.json(result);
 })
 
 //Store (Crud)  -->localhost:3000/posts
@@ -32,6 +36,5 @@ router.patch('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
 	res.send(`You requested to DELETE the post with id: ${req.params.id}`);
 })
-
 
 module.exports = router;
