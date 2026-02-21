@@ -1,7 +1,10 @@
 const posts = require('../data/post_data.js');	
 
 const index = (req,res)=>{
-    res.json(posts);
+    const tag = req.query.tag;
+    if (!tag) return res.json(posts);
+    const filteredposts = posts.filter(post=>post.tags.some(t=>t.toLowerCase()===tag.toLowerCase()));
+    res.json(filteredposts);
 }
 
 const show = (req, res)=>{
