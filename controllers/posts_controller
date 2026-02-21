@@ -1,0 +1,31 @@
+const posts = require('../data/post_data.js');	
+
+const index = (req,res)=>{
+    res.json(posts);
+}
+
+const show = (req, res)=>{
+	const id = Number(req.params.id); 
+	if (isNaN(id)){return res.status(400).json({error:"Not valid request",message:"This request is not valid"})}
+	const result = posts.find(post=>post.id===id);
+	if(!result){return res.status(404).json({error:"Not Found",message:"Post not found"});}
+	res.json(result);
+}
+
+const store = (req, res) => {
+	res.send(`You requested to CREATE a new post`);
+}
+
+const update = (req, res) => {
+	res.send(`You requested to UPDATE (full overwrite) the post with id: ${req.params.id}`);
+}
+
+const modify = (req, res) => {
+	res.send(`You requested to MODIFY (partial) the post with id: ${req.params.id}`);
+}
+
+const destroy = (req, res) => {
+	res.send(`You requested to DELETE the post with id: ${req.params.id}`);
+}
+
+module.exports = {index, show, store, update, modify, destroy};

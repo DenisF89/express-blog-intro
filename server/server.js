@@ -1,5 +1,5 @@
 const express = require('express');		//CommonJS(require) vs ModuleJS(import)
-const posts = require('../post_data.js');	//o uno o l'altro, non si usano insieme (package.json --> "type": "commonjs" o "module")
+const posts = require('../data/post_data.js');	//o uno o l'altro, non si usano insieme (package.json --> "type": "commonjs" o "module")
 
 const app = express();					//creo server		
 const port = 3000;						//ingresso su dove il server riceve richieste

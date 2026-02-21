@@ -1,40 +1,24 @@
 const express = require('express');
-const posts = require('../post_data.js');	
+const postsController = require('../controllers/posts_controller')
 
 const router = express.Router();
 
 //Index (cRud)  --> localhost:3000/posts
-router.get('/', (req, res) => {
-	res.json(posts);
-})
+router.get('/', postsController.index )
 
 //Show (cRud)	--> localhost:3000/posts/1
-router.get('/:id', (req, res) => {
-	//res.send(`You requested to SHOW the post with id: ${req.params.id}`);
-	const id = Number(req.params.id); 
-	const result = posts.find(post=>post.id===id);
-	if(!result){return res.send("Post not found");}
-	res.json(result);
-})
+router.get('/:id', postsController.show );
 
 //Store (Crud)  -->localhost:3000/posts
-router.post('/', (req, res) => {
-	res.send(`You requested to CREATE a new post`);
-})
+router.post('/', postsController.store );
 
 //Update (crUd)	-->localhost:3000/posts/1
-router.put('/:id', (req, res) => {
-	res.send(`You requested to UPDATE (full overwrite) the post with id: ${req.params.id}`);
-})
+router.put('/:id', postsController.update );
 
 //Modify (crUd) -->localhost:3000/posts/1
-router.patch('/:id', (req, res) => {
-	res.send(`You requested to MODIFY (partial) the post with id: ${req.params.id}`);
-})
+router.patch('/:id', postsController.modify );
 
 //Destroy (cruD) -->localhost:3000/posts/1
-router.delete('/:id', (req, res) => {
-	res.send(`You requested to DELETE the post with id: ${req.params.id}`);
-})
+router.delete('/:id', postsController.destroy );
 
 module.exports = router;
