@@ -1,10 +1,30 @@
 const posts = require('../data/post_data.js');	
 
 const index = (req,res)=>{
-    const tag = req.query.tag;
+
+    //CON UN TAG PRECISO: ?tag=dolci (case-insensitive)
+    /* const tag = req.query.tag;
     if (!tag) return res.json(posts);
     const filteredposts = posts.filter(post=>post.tags.some(t=>t.toLowerCase()===tag.toLowerCase()));
-    res.json(filteredposts);
+    res.json(filteredposts); */
+
+
+    //CON PIU TAG:  ?tag=dolci&tag=ricette
+    const { tag } = req.query;              //express unisce piu valori con stessa chiave in array
+
+    if (!tag) return res.json(posts);       //controllo: se non esiste querystring restituisci tutto posts
+
+    const alltags = (Array.isArray(tag)     //trasformo sempre in un array
+                    ? tag
+                    : [tag]) 
+    .map(t => t.toLowerCase().trim());      //normalizzo querystring
+
+    const results = posts.filter(p =>                       //restituisci solo i post dove
+                    alltags.every(onetag =>                 //ogni tag nell'array di querystring
+                    p.tags.some(t =>                        //(se c'è almeno una corrispondenza)
+                    t.toLowerCase().includes(onetag))));    //è incluso(uguaglianza parziale) in una delle stringhe(tutto minuscolo) dell'array della proprità tags
+
+    res.json(results);
 }
 
 const show = (req, res)=>{
