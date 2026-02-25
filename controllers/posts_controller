@@ -60,9 +60,32 @@ const store = (req, res) => {
 }
 
 const update = (req, res) => {
-	
+	const id = Number(req.params.id); 
+    if (isNaN(id)){return res.status(400).json({error:"Not valid request",message:"This request is not valid"})} 
+    const post = posts.find(post=>post.id===id); 
+    if(!post){return res.status(404).json({error:"Not Found",message:"Post not found"});} 
+
+    //IL PUT SOSTITUISCE PER INTERO IL RECORD
+    //ESEMPIO CON TUTTI I PARAMETRI OBBLIGATORI DA PASSARE O ERRORE
+    const required = ["title", "content", "image", "tags"];             //parametri obbligatori
+    const missing = required.filter(r => req.body[r] === undefined);    //se nella richiesta non è presente il parametro obbligatorio scrivilo in "missing"
+
+    if (missing.length)                                     //se ci sono parametri mancanti
+        { return res.status(400).json(                      //torna errore json
+                { error: "Bad Request", 
+                message: "Missing required parameters", 
+                missing}                                    //parametri mancanti
+        );} 
     
-	 
+    const { title, content, image, tags } = req.body;       //destructuring del body request
+
+    post.title = title; 
+    post.content = content; 
+    post.image = image; 
+    post.tags = tags; 
+
+    console.log(post); 
+    res.status(200).json(post); 
 }
 
 const modify = (req, res) => {
