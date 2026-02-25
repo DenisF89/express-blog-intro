@@ -79,10 +79,31 @@ const update = (req, res) => {
     
     const { title, content, image, tags } = req.body;       //destructuring del body request
 
+    //CONTROLLO STRINGA TITLE
+    //Se il titolo non ha almeno 3 caratteri restituisci errore
+    if(String(title).length<3){
+        return res.status(400).json(                      //torna errore json
+                { error: "Bad Request", 
+                message: "Title too short", 
+                title}                                    
+        );} 
+
+    //CONTROLLO TAGS SEMPRE ARRAY
+    const alltags = (Array.isArray(tags)        //se array
+                    ? tags                      //lascia array
+                    : String(tags).split(","))  //se no trasforma in stringa, dividi con virgola e restituisci array
+    .map(t => {
+                const result = t.toLowerCase().trim();     //normalizzo tags
+                return result.charAt(0).toUpperCase()+result.slice(1); //inizio lettera maiuscola
+                }
+        );      
+                
+
     post.title = title; 
     post.content = content; 
     post.image = image; 
-    post.tags = tags; 
+    post.tags = alltags; 
+    
 
     console.log(post); 
     res.status(200).json(post); 
