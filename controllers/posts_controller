@@ -36,11 +36,31 @@ const show = (req, res)=>{
 }
 
 const store = (req, res) => {
-	res.send(`You requested to CREATE a new post`);
+
+    console.log(req.body);                                          //req.body chiamata al server POST, invio Body Request in formato json
+    const { title, content, image, tags } = req.body;                         //destructuring del json
+    const maxId = posts.length  ? Math.max(...posts.map(p => p.id)) //recupero l'id piu alto nell'array di oggetti con Math.max
+                                : 0;                                //se non ci sono post, l'id base è 0
+    console.log("Id piu grande: "+maxId)
+
+	const newPost = {           //creo un nuovo oggetto post da inserire nell'array
+        id: maxId+1,            //aggiungo +1 all'id più grande dell'array (id univoco per ogni oggetto)
+        title,                   //dichiaro le chiavi-valori 
+        content,
+        image,
+        tags
+    };
+    console.log(newPost);
+
+    posts.push(newPost);        //inserisco l'oggetto nel'array
+    console.log(posts.length);  //dovrebbe restituire un oggetto in più
+
+    res.status(201);            //status di nuovo oggetto creato con successo
+    res.json(newPost);          //restituisco il nuovo oggetto in formato json
 }
 
 const update = (req, res) => {
-	res.send(`You requested to UPDATE (full overwrite) the post with id: ${req.params.id}`);
+	res.send(`You requested to MODIFY (overwrite) the post with id: ${req.params.id}`);
 }
 
 const modify = (req, res) => {
