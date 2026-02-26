@@ -129,12 +129,14 @@ const modify = (req, res) => {
 
     const checked = check(req.body,res);                            //controllo body request
     if(!checked)return;
-    const { title, content, image, tags } = checked;                       
+    
+    const allowedProperties = ["title", "content", "image", "tags"] //proprietà modificabili              
 
-	if (title) post.title = title;          //aggiorna valore se passato altrimenti rimane come prima
-    if (content) post.content = content;    
-    if (image) post.image = image;
-    if (tags) post.tags = tags;         
+    for (const propertyName of allowedProperties){                  //per ogni proprietà
+        if(checked[propertyName] !== undefined){                    //se è stata passata dal body request
+            post[propertyName] = checked[propertyName]              //registrala su post
+        }
+    } 
     
     console.log(post);
 
