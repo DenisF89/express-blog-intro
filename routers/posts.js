@@ -15,7 +15,7 @@ router.get('/', postsController.index );
 router.get('/:id', postsController.show );
 
 //Store (Crud) 
-router.post('/', checkBody, postsController.store );
+router.post('/', checkRequired, checkBody, postsController.store );
 
 //Update (crUd)	
 router.put('/:id', checkRequired, checkBody, postsController.update );
