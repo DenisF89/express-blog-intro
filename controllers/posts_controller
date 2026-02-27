@@ -1,30 +1,5 @@
 const posts = require('../data/post_data.js');	
 
-function check(b,res){
-    let {title,tags} = b;
-    //CONTROLLO STRINGA TITLE
-    //Se il titolo non ha almeno 3 caratteri restituisci errore
-    if(String(title).length<3){
-        return res.status(400).json(                      //torna errore json
-                { error: "Bad Request", 
-                message: "Title too short", 
-                title}                                    
-        );} 
-
-    //CONTROLLO TAGS SEMPRE ARRAY
-    if(tags){
-    tags = (Array.isArray(tags)        //se array
-                    ? tags                      //lascia array
-                    : String(tags).split(","))  //se no trasforma in stringa, dividi con virgola e restituisci array
-    .map(t => {
-                const result = t.toLowerCase().trim();     //normalizzo tags
-                return result.charAt(0).toUpperCase()+result.slice(1); //inizio lettera maiuscola
-                }
-        );  
-    }
-    return {...b, tags }  
-}
-
 const index = (req,res)=>{
 
     //CON UN TAG PRECISO: ?tag=dolci (case-insensitive)
@@ -33,8 +8,7 @@ const index = (req,res)=>{
     const filteredposts = posts.filter(post=>post.tags.some(t=>t.toLowerCase()===tag.toLowerCase()));
     res.json(filteredposts); */
 
-
-    //CON PIU TAG:  ?tag=dolci&tag=ricette
+    //CON UNO O PIU TAG:  ?tag=dolci&tag=ricette
     const { tag } = req.query;              //express unisce piu valori con stessa chiave in array
 
     if (!tag) return res.json(posts);       //controllo: se non esiste querystring restituisci tutto posts
@@ -53,108 +27,64 @@ const index = (req,res)=>{
 }
 
 const show = (req, res)=>{
-	const id = Number(req.params.id); 
-	if (isNaN(id)){return res.status(400).json({error:"Not valid request",message:"This request is not valid"})}
-	const result = posts.find(post=>post.id===id);
-	if(!result){return res.status(404).json({error:"Not Found",message:"Post not found"});}
-	res.json(result);
+	res.json(req.post);         //post lo ricavo dal middleware checkId
 }
 
 const store = (req, res) => {
 
-    console.log(req.body);                                          //req.body chiamata al server POST, invio Body Request in formato json
-    const checked = check(req.body,res);                            //controllo body request
-    if(!checked)return;
-    const { title, content, image, tags } = checked;               //destructuring del json
+    console.log(req.body);                                          
+    const { title, content, image, tags } = req.body;               //destructuring del json
     const maxId = posts.length  ? Math.max(...posts.map(p => p.id)) //recupero l'id piu alto nell'array di oggetti con Math.max
                                 : 0;                                //se non ci sono post, l'id base è 0
     console.log("Id piu grande: "+maxId)
 
 	const newPost = {           //creo un nuovo oggetto post da inserire nell'array
         id: maxId+1,            //aggiungo +1 all'id più grande dell'array (id univoco per ogni oggetto)
-        title,                   //dichiaro le chiavi-valori 
+        title,                  //dichiaro le chiavi-valori 
         content,
         image,
         tags
     };
     console.log(newPost);
 
-    posts.push(newPost);        //inserisco l'oggetto nel'array
-    console.log(posts.length);  //dovrebbe restituire un oggetto in più
+    posts.push(newPost);                //inserisco l'oggetto nel'array
+    console.log(posts.length);          //dovrebbe restituire un oggetto in più
 
-    res.status(201);            //status di nuovo oggetto creato con successo
-    res.json(newPost);          //restituisco il nuovo oggetto in formato json
+    res.status(201).json(newPost);      //201 status di nuovo oggetto creato con successo e lo restituisco
 }
 
-const update = (req, res) => {
-	const id = Number(req.params.id); 
-    if (isNaN(id)){return res.status(400).json({error:"Not valid request",message:"This request is not valid"})} 
-    const post = posts.find(post=>post.id===id); 
-    if(!post){return res.status(404).json({error:"Not Found",message:"Post not found"});} 
+const update = (req, res) => { 
 
-    //IL PUT SOSTITUISCE PER INTERO IL RECORD
-    //ESEMPIO CON TUTTI I PARAMETRI OBBLIGATORI DA PASSARE O ERRORE
-    const required = ["title", "content", "image", "tags"];             //parametri obbligatori
-    const missing = required.filter(r => req.body[r] === undefined);    //se nella richiesta non è presente il parametro obbligatorio scrivilo in "missing"
+    const post = req.post;                  //recupero il post da middleware checkId
 
-    if (missing.length)                                     //se ci sono parametri mancanti
-        { return res.status(400).json(                      //torna errore json
-                { error: "Bad Request", 
-                message: "Missing required parameters", 
-                missing}                                    //parametri mancanti
-        );} 
-    
-    const checked = check(req.body, res);   //check del body request
-    if (!checked) return; // se check ha restituito errore
+    for (const key in post){                //per ogni proprietà in post
+        if (key !== "id")                   //se diversa da id (id rimane invariato)
+        {post[key] = req.body[key]}         //sovrascrivi con i nuovi valori
+    }
 
-    const { title, content, image, tags } = checked; //destructuring 
-
-    post.title = title; 
-    post.content = content; 
-    post.image = image; 
-    post.tags = tags; 
-
-    console.log(post); 
-    res.status(200).json(post); 
+    console.log(post);                      
+    res.status(200).json(post);             //restituisco il post aggiornato
 }
 
 const modify = (req, res) => {
-    //recupero id come per show e restituisco errore se non trovo il post
-	const id = Number(req.params.id); 
-	if (isNaN(id)){return res.status(400).json({error:"Not valid request",message:"This request is not valid"})}
-	const post = posts.find(post=>post.id===id);
-	if(!post){return res.status(404).json({error:"Not Found",message:"Post not found"});}
-
-    //destructuring del body request
-
-    const checked = check(req.body,res);                            //controllo body request
-    if(!checked)return;
+ 
+	const post = req.post
     
     const allowedProperties = ["title", "content", "image", "tags"] //proprietà modificabili              
 
-    for (const propertyName of allowedProperties){                  //per ogni proprietà
-        if(checked[propertyName] !== undefined){                    //se è stata passata dal body request
-            post[propertyName] = checked[propertyName]              //registrala su post
+    for (const propertyName of allowedProperties){                  //per ogni elemento dell'array
+        if(req.body[propertyName] !== undefined){                   //se è stata passata dal body request
+            post[propertyName] = req.body[propertyName]             //registrala su post
         }
     } 
     
     console.log(post);
 
-    res.status(200);         //status OK
-    res.json(post);          //restituisco il post aggiornato 
+    res.status(200).json(post);                                     //restituisco il post aggiornato 
 }
 
 const destroy = (req, res) => {
-    const id = Number(req.params.id); 
-    const post = posts.find(post=>post.id===id);
-    if (!post){
-        res.status(404);
-        return res.json({
-            status:404,
-            error:"Not Found",
-            message:"Nessun post con questo id"
-        })
-    }
+    const post = req.post;
     posts.splice(posts.indexOf(post),1);
     console.log(posts);
 	res.sendStatus(204);

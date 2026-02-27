@@ -1,24 +1,29 @@
 const express = require('express');
-const postsController = require('../controllers/posts_controller')
+const postsController = require('../controllers/posts_controller');
+const checkId = require('../middlewares/checkId');
+const checkRequired = require('../middlewares/checkRequired');
+const checkBody = require('../middlewares/checkBody');
 
 const router = express.Router();
 
-//Index (cRud)  --> localhost:3000/posts
-router.get('/', postsController.index )
+router.use('/:id', checkId);    // MIDDLEWARE sul router posts valido su tutti i path con parametro id
 
-//Show (cRud)	--> localhost:3000/posts/1
+//Index (cRud)
+router.get('/', postsController.index );
+
+//Show (cRud)	
 router.get('/:id', postsController.show );
 
-//Store (Crud)  -->localhost:3000/posts
-router.post('/', postsController.store );
+//Store (Crud) 
+router.post('/', checkBody, postsController.store );
 
-//Update (crUd)	-->localhost:3000/posts/1
-router.put('/:id', postsController.update );
+//Update (crUd)	
+router.put('/:id', checkRequired, checkBody, postsController.update );
 
-//Modify (crUd) -->localhost:3000/posts/1
-router.patch('/:id', postsController.modify );
+//Modify (crUd) 
+router.patch('/:id', checkBody, postsController.modify );
 
-//Destroy (cruD) -->localhost:3000/posts/1
+//Destroy (cruD) 
 router.delete('/:id', postsController.destroy );
 
 module.exports = router;
