@@ -2,7 +2,7 @@ function notFound (req, res, next) {
     res.status(404)
     res.json({
     error: "Not Found",
-    message: "Page doesn't exist"
+    message: "La pagina non esiste"
 });
 };
 module.exports = notFound;
