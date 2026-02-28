@@ -1,5 +1,3 @@
-const posts = require('../data/post_data.js');	
-
 function checkId(req, res, next) {
 
 //RECUPERO ID E CONTROLLO CHE SIA NUMERICO
@@ -16,21 +14,9 @@ function checkId(req, res, next) {
     } 
     console.log("id valido: "+id);
 
-//RECUPERO IL POST SE ESISTE
-    console.log("Recupero il post");
-    const post = posts.find(post=>post.id===id);
-	if(!post){
-        console.log("Il post "+id+" non esiste")
-        return res.status(404).json(
-                                        {
-                                            error:"Not Found",
-                                            message:"Il post "+id+" non esiste"
-                                        }
-                                    );
-    }
-    req.post = post;
-    console.log("Post recuperato")
-   next();
+    next();
 };
 
 module.exports = checkId;
+
+
